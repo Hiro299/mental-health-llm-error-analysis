@@ -1,0 +1,33 @@
+# Local LLM Classification & Error Analysis on Mental Health Text (105-Sample Benchmark)
+
+## 1. Purpose & Dataset
+- **Goal**: Compare two locally hosted open-weights LLMs (`llama3.2:3b` vs. `qwen2.5:7b`) via Ollama on multi-class mental health text classification under a strict single-label constraint (`temperature=0`), focusing on instruction adherence, safety refusals, and error patterns rather than claiming clinical utility.
+- **Dataset**: `Combined Data.csv` (public Kaggle mental health text dataset; 53,043 total rows). After dropping missing/empty `statement` or `status` entries and deduplicating identical `statement` texts, 15 samples per class were randomly sampled (`random_state=42`) across 7 labels (`Normal`, `Depression`, `Suicidal`, `Anxiety`, `Stress`, `Bipolar`, `Personality disorder`), yielding **105 items** (210 model calls total).
+
+## 2. Procedure & Setup
+- **Runtime**: Local Ollama API (`http://localhost:11434/api/generate`) on macOS with Python (`pandas`, `requests`).
+- **Prompting & Decoding**: Zero-shot prompt requesting *only* one exact label from the 7-class list, with `temperature: 0` and text truncated to 1,000 characters.
+- **Files**:
+  - `compare_105.py`: Sampling, inference, refusal detection, and summary script.
+  - `compare_105_results.csv`: Row-level predictions, match flags, and refusal flags.
+  - `compare_105_summary.txt`: Aggregate metrics and per-class match counts.
+
+## 3. Results & Error Analysis
+- **Overall Metrics (n = 105)**:
+  - `llama3.2:3b`: Exact match **21.9% (23/105)** | Valid label format **67.6% (71/105)** | Refusal/non-label responses **30.5% (32/105)**
+  - `qwen2.5:7b`: Exact match **54.3% (57/105)** | Valid label format **100.0% (105/105)** | Refusal/non-label responses **0.0% (0/105)**
+- **Per-Class Exact Matches (out of 15 per class)**:
+  - `Normal`: Llama `8/15` | Qwen `13/15`
+  - `Depression`: Llama `7/15` | Qwen `8/15`
+  - `Suicidal`: Llama `0/15` | Qwen `8/15`
+  - `Anxiety`: Llama `3/15` | Qwen `11/15`
+  - `Stress`: Llama `2/15` | Qwen `7/15`
+  - `Bipolar`: Llama `3/15` | Qwen `8/15`
+  - `Personality disorder`: Llama `0/15` | Qwen `2/15`
+- **Observed Failure Modes**:
+  1. **Refusal / Format Non-Compliance**: `llama3.2:3b` frequently refused or gave conversational/diagnostic disclaimers instead of a label (32/105), including on non-`Suicidal` items, and emitted an out-of-list label (`Hypomanic`, row 82).
+  2. **Boundary Confusion & Severity Under-Detection**: Even `qwen2.5:7b` (54.3%) misclassified `Personality disorder` (mostly toward `Depression`, `Anxiety`, or `Normal`) and mapped several `Suicidal` items to `Depression` or `Normal`, illustrating ambiguity in brief self-report text without clinical context.
+
+## 4. Limitations & Next Steps
+- **Limitations**: Small stratified sample (105 items), noisy crowd/platform-derived labels in the source dataset, English-only text, and non-clinical evaluation (not a clinical diagnostic tool or risk assessment system).
+- **Next Steps**: Inspect specific false positives/negatives qualitatively, test structured output / prompt refinements, and explore guideline-grounded (e.g., NHS/NICE) knowledge retrieval rather than relying on standalone zero-shot classification.
