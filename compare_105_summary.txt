@@ -1,0 +1,27 @@
+=== 105-Sample Comparison Summary ===
+
+Model: llama3.2:3b
+  - Exact match rate : 21.9% (23/105)
+  - Valid label rate : 67.6% (71/105)
+  - Refusal rate     : 30.5% (32/105)
+  - Matches by true class:
+      Normal: 8/15
+      Depression: 7/15
+      Suicidal: 0/15
+      Anxiety: 3/15
+      Stress: 2/15
+      Bipolar: 3/15
+      Personality disorder: 0/15
+
+Model: qwen2.5:7b
+  - Exact match rate : 54.3% (57/105)
+  - Valid label rate : 100.0% (105/105)
+  - Refusal rate     : 0.0% (0/105)
+  - Matches by true class:
+      Normal: 13/15
+      Depression: 8/15
+      Suicidal: 8/15
+      Anxiety: 11/15
+      Stress: 7/15
+      Bipolar: 8/15
+      Personality disorder: 2/15
